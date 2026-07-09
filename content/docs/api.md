@@ -295,6 +295,29 @@ Notes:
 
 - `icon` is `null` when the feed doesn't have any favicon.
 
+Since Miniflux 2.3.3, you can pass the argument `?fields=` with a comma-separated list of field names to return only those fields:
+
+Request:
+
+    GET /v1/feeds?fields=id,title,category.title
+
+Response:
+
+```json
+[
+    {
+        "id": 42,
+        "title": "Example Feed",
+        "category": {
+            "title": "Some category"
+        }
+    }
+]
+```
+
+- Field names are the JSON keys of the response objects. Use a dot to select a single field of a nested object (`category.title`, `icon.icon_id`); a bare name selects the whole nested object (`category`).
+- Unknown field names return a `400 Bad Request`.
+
 <h3 id="endpoint-get-category-feeds">Get Category Feeds <a class="anchor" href="#endpoint-get-category-feeds" title="Permalink">¶</a></h3>
 
 Request:
@@ -339,6 +362,8 @@ Response:
     }
 ]
 ```
+
+Since Miniflux 2.3.3, the `fields` argument is supported to return only the given fields (see [Get Feeds](#endpoint-get-feeds)).
 
 <div class="info">
 This API endpoint is available since Miniflux v2.0.29.
@@ -390,6 +415,8 @@ Response:
 Notes:
 
 - `icon` is `null` when the feed doesn't have any favicon.
+
+Since Miniflux 2.3.3, the `fields` argument is supported to return only the given fields (see [Get Feeds](#endpoint-get-feeds)).
 
 <h3 id="endpoint-get-feed-icon-by-feed-id">Get Feed Icon By Feed ID<a class="anchor" href="#endpoint-get-feed-icon-by-feed-id" title="Permalink">¶</a></h3>
 
@@ -625,6 +652,8 @@ Response:
 }
 ```
 
+Since Miniflux 2.3.3, the `fields` argument is supported to return only the given fields (see [Get Entries](#endpoint-get-entries)).
+
 <h3 id="endpoint-get-entry">Get Entry <a class="anchor" href="#endpoint-get-entry" title="Permalink">¶</a></h3>
 
 Request:
@@ -685,6 +714,8 @@ Response:
     }
 }
 ```
+
+Since Miniflux 2.3.3, the `fields` argument is supported to return only the given fields (see [Get Entries](#endpoint-get-entries)).
 
 <h3 id="endpoint-import-entry">Import Entry <a class="anchor" href="#endpoint-import-entry" title="Permalink">¶</a></h3>
 
@@ -844,7 +875,7 @@ Request:
 
 Available filters:
 
-- `status`: Entry status (read, unread or removed), this option can be repeated to filter by multiple statuses (version >= 2.0.24)
+- `status`: Entry status (read or unread), this option can be repeated to filter by multiple statuses (version >= 2.0.24)
 - `offset`
 - `limit`
 - `order`: "id", "status", "published\_at", "category\_title",
@@ -862,6 +893,7 @@ Available filters:
 - `search`: search query (text, available since Miniflux 2.0.10)
 - `category_id`: filter by category (int, available since Miniflux 2.0.19)
 - `globally_visible`: filter on globally visible entries (boolean, available since Miniflux 2.2.0)
+- `fields`: comma-separated list of fields to return, e.g. `fields=id,title,feed.title` (available since Miniflux 2.3.3)
 
 Response:
 
@@ -931,7 +963,7 @@ Request:
 
 Available filters:
 
-- `status`: Entry status (read, unread or removed), this option can be repeated to filter by multiple statuses (version >= 2.0.24)
+- `status`: Entry status (read or unread), this option can be repeated to filter by multiple statuses (version >= 2.0.24)
 - `offset`
 - `limit`
 - `order`: "id", "status", "published\_at", "category\_title",
@@ -949,6 +981,7 @@ Available filters:
 - `search`: search query (text, available since Miniflux 2.0.10)
 - `category_id`: filter by category (int, available since Miniflux 2.0.19)
 - `globally_visible`: filter on globally visible entries (boolean, available since Miniflux 2.2.0)
+- `fields`: comma-separated list of fields to return, e.g. `fields=id,title,feed.title` (available since Miniflux 2.3.3)
 
 Response:
 
@@ -1030,7 +1063,7 @@ Request:
 
 Available filters:
 
-- `status`: Entry status (read, unread or removed), this option can be repeated to filter by multiple statuses (version >= 2.0.24)
+- `status`: Entry status (read or unread), this option can be repeated to filter by multiple statuses (version >= 2.0.24)
 - `offset`
 - `limit`
 - `order`: "id", "status", "published\_at", "category\_title",
@@ -1048,6 +1081,7 @@ Available filters:
 - `search`: search query (text, available since Miniflux 2.0.10)
 - `category_id`: filter by category (int, available since Miniflux 2.0.24)
 - `globally_visible`: filter on globally visible entries (boolean, available since Miniflux 2.2.0)
+- `fields`: comma-separated list of fields to return, e.g. `fields=id,title,feed.title` (available since Miniflux 2.3.3)
 
 Response:
 
@@ -1108,6 +1142,33 @@ Response:
     ]
 }
 ```
+
+Since Miniflux 2.3.3, you can pass the argument `?fields=` with a comma-separated list of field names to return only those fields. The `total` key is always included:
+
+Request:
+
+    GET /v1/entries?status=unread&fields=id,title,feed.title
+
+Response:
+
+```json
+{
+    "total": 10,
+    "entries": [
+        {
+            "id": 888,
+            "title": "Entry Title",
+            "feed": {
+                "title": "New Feed Title"
+            }
+        }
+    ]
+}
+```
+
+- Field names are the JSON keys of the response objects. Use a dot to select a single field of a nested object (`feed.title`, `enclosures.url`); a bare name selects the whole nested object (`feed`).
+- Unknown field names return a `400 Bad Request`.
+- Omitting fields like `content` and `enclosures` also avoids fetching them from the database, making the query significantly cheaper for large lists.
 
 <h3 id="endpoint-get-entry-ids">Get Entry IDs <a class="anchor" href="#endpoint-get-entry-ids" title="Permalink">¶</a></h3>
 
